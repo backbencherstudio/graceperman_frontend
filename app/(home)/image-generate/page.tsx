@@ -378,10 +378,9 @@ export default function ImageAnnotator() {
 //   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 //   const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
 
-
 //   const [mode, setMode] = useState<"pencil" | "circle">("circle");
 //   const [startPoint, setStartPoint] = useState<Point | null>(null);
-
+//   const [resultImage, setResultImage] = useState<string | null>(null);
 
 //   const [optionalImage, setOptionalImage] = useState<File | null>(null);
 //   const [optionalPreview, setOptionalPreview] = useState<string | null>(null);
@@ -476,7 +475,7 @@ export default function ImageAnnotator() {
 //   };
 
 
-//   const handleMouseDown = (e: any) => {
+//   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
 //     const point = getPoint(e);
 //     setStartPoint(point);
 //     setIsDrawing(true);
@@ -590,31 +589,26 @@ export default function ImageAnnotator() {
 //   const handleSave = () => {
 //     const canvas = canvasRef.current;
 //     if (!canvas) return;
-//     setLoading(true);
 
+//     setLoading(true);
 
 //     canvas.toBlob(async (blob) => {
 //       if (!blob) return;
 
-
 //       const formData = new FormData();
-
 
 //       const file = new File([blob], "annotated.png", {
 //         type: "image/png",
 //       });
 
+//       formData.append("base_image", file);
 
-//       formData.append("mask_image", file);
-
-
-//       if (optionalImage) {
-//         formData.append("base_image", optionalImage);
+//       // optional image (SAFE)
+//       if (optionalImage instanceof File) {
+//         formData.append("mask_image", optionalImage);
 //       }
 
-
-//       formData.append("prompt", text);
-
+//       formData.append("prompt", text || "");
 
 //       try {
 //         const res = await fetch(
@@ -625,139 +619,153 @@ export default function ImageAnnotator() {
 //           }
 //         );
 
-
-//         if (!res.ok) {
-//           throw new Error("Network response was not ok");
-//         }
-
-
 //         const data = await res.json();
+//         setResultImage(data.image_url);
 
-
-//         console.log("SUCCESS RESPONSE:", data);
+//         console.log("SUCCESS:", data);
 //       } catch (err) {
 //         console.log("ERROR:", err);
-//         // alert("Server is not running or API error");
+//       } finally {
+//         setLoading(false);
 //       }
 //     }, "image/png");
 //   };
+
 //   const clearCanvas = () => {
 //     if (imageUrl) drawImage(imageUrl);
 //   };
 
 
 //   return (
-//     <div className="flex justify-center items-center  h-screen overflow-x-hidden ">
+//     <div className="
+//        flex justify-center items-center mx-auto  w-full max-w-5xl bg-white backdrop-blur-md shadow-xl rounded-2xl px-6 border border-white/40">
 //       <div style={{ padding: 20 }}>
-//         <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 lg:gap-9">
-//           <div>
-//             <div className="flex justify-between">
-//               <div>
-//                 <h2>Image Annotator</h2>
 
+//         <div className="grid grid-cols-1 lg:grid-cols-2 gap-9">
+//           <div className="grid grid-cols-1 lg:grid-cols-1 gap-0 ">
+//             <div>
+//               <div className="flex justify-between">
+//                 <div>
+//                   <h2>Image Annotator</h2>
 
-//                 {/* Upload */}
-//                 <input
-//                   type="file"
-//                   accept="image/*"
-//                   onChange={handleUpload}
-//                   className=""
-//                 />
+//                   {/* Upload */}
+//                   <input
+//                     type="file"
+//                     accept="image/*"
+//                     onChange={handleUpload}
+//                     className=" border rounded border-dashed px-1 cursor-pointer"
+//                   />
+//                 </div>
+
+//                 {/* Pencil Toggle */}
+//                 <button
+//                   onClick={() => setIsPencilActive(!isPencilActive)}
+//                   style={{
+//                     marginTop: 10,
+//                     padding: "8px 12px",
+//                     background: isPencilActive ? "green" : "gray",
+//                     color: "#fff",
+//                     display: "flex",
+//                     alignItems: "center",
+//                     gap: "5px",
+//                     borderRadius: "5px",
+//                   }}
+//                   className="cursor-pointer">
+//                   <Pencil size={16} />
+//                   {isPencilActive}
+//                 </button>
 //               </div>
 
-
-//               {/* Pencil Toggle */}
-//               <button
-//                 onClick={() => setIsPencilActive(!isPencilActive)}
-//                 style={{
-//                   marginTop: 10,
-//                   padding: "8px 12px",
-//                   background: isPencilActive ? "green" : "gray",
-//                   color: "#fff",
-//                   display: "flex",
-//                   alignItems: "center",
-//                   gap: "5px",
-//                   borderRadius: "5px",
-//                 }}
-//               >
-//                 <Pencil size={16} />
-//                 {isPencilActive}
-//               </button>
-//             </div>
-
-
-//             {/* Canvas */}
-//             <div className="border mt-5 w-[400px]">
-//               <canvas
-//                 ref={canvasRef}
-//                 onMouseDown={handleMouseDown}
-//                 onMouseMove={handleMouseMove}
-//                 onMouseUp={handleMouseUp}
-//                 onMouseLeave={handleMouseUp}
-//                 style={{
-//                   cursor: "url('/image/pencil.png.jpg') 0 32, pointer",
-//                   width: "100%",
-//                   height: "300px",
-//                 }}
-//               />
-//             </div>
-//           </div>
-
-
-//           {/* second image */}
-//           <div className="mt-9 lg:mt-17 relative ">
-//             <label className="cursor-pointer outline   h-75 w-100 flex flex-col items-center justify-center">
-//               <input
-//                 type="file"
-//                 className="hidden "
-//                 accept="image/*"
-//                 onChange={(e) => {
-//                   const file = e.target.files?.[0];
-//                   if (!file) return;
-
-
-//                   setOptionalImage(file);
-//                   setOptionalPreview(URL.createObjectURL(file));
-//                 }}
-//               />
-//               {optionalImage ? (
-//                 <div className="absolute top-2 left-2 bg-white bg-opacity-75 px-1 text-sm ">
-//                   {showText}
-//                 </div>
-//               ) : (
-//                 <span className="text-gray-500">
-//                   Click to upload optional image
-//                 </span>
-//               )}
-
-
-//               {/* Preview */}
-//               {optionalPreview && (
-//                 <img
-//                   className=" object-center   w-full h-full  "
-//                   src={optionalPreview}
-//                   alt="Optional Preview"
+//               {/* Canvas */}
+//               <div className=" mt-5 w-[400px]">
+//                 <canvas
+//                   ref={canvasRef}
+//                   onMouseDown={handleMouseDown}
+//                   onMouseMove={handleMouseMove}
+//                   onMouseUp={handleMouseUp}
+//                   onMouseLeave={handleMouseUp}
 //                   style={{
+//                     cursor: "url('/image/pencil.png.jpg') 0 32, pointer",
 //                     width: "100%",
 //                     height: "300px",
 //                   }}
+//                   className="cursor-pointer   transition border-1 border-dashed border-black/60 rounded-xl h-80 flex flex-col items-center justify-center  hover:bg-white/30 "
 //                 />
+//               </div>
+//             </div>
+
+//             {/* second image */}
+//             <div className="mt-4 relative  ">
+//               <h2 className="pb-2">Optional Image</h2>
+
+//               <label className="cursor-pointer border-1 border-dashed border-black/60 rounded-xl h-65 w-100 flex flex-col items-center justify-center  hover:bg-white/30 transition">
+//                 <input
+//                   type="file"
+//                   className="hidden "
+//                   accept="image/*"
+//                   onChange={(e) => {
+//                     const file = e.target.files?.[0];
+//                     if (!file) return;
+
+//                     setOptionalImage(file);
+//                     setOptionalPreview(URL.createObjectURL(file));
+//                   }}
+//                 />
+//                 {optionalImage ? (
+//                   <div className="absolute top-2 left-2 bg-white bg-opacity-75 px-1 text-sm ">
+//                     {showText}
+//                   </div>
+//                 ) : (
+//                   <span className="text-gray-500">
+//                     Click to upload optional image
+//                   </span>
+//                 )}
+
+//                 {/* Preview */}
+//                 {optionalPreview && (
+//                   <img
+//                     className=" object-center rounded-xl  w-full h-full"
+//                     src={optionalPreview}
+//                     alt="Optional Preview"
+//                     style={{
+//                       width: "100%",
+//                       height: "100%",
+//                     }}
+//                   />
+//                 )}
+//               </label>
+//             </div>
+//           </div>
+
+//           {/* response image show */}
+
+//           <div className="lg:mt-10">
+//             <h2 className="pb-2">Generated Image</h2>
+//             <div className="border h-[300px] border-black/60 border-dashed rounded-xl">
+
+//               {resultImage && (
+//                 <div className="">
+
+
+//                   <img
+//                     src={resultImage}
+//                     alt="result"
+//                     className=" w-full h-75 rounded-xl"
+//                   />
+//                 </div>
 //               )}
-//             </label>
+//             </div>
 //           </div>
 //         </div>
 
-
 //         {/* Text Input */}
-//         <input
-//           className="outline rounded-md outline-white w-[400px]"
-//           type="text"
+//         <textarea
+//           className=" cursor-pointer border-1 border-dashed border-black/60 rounded-xl w-[400px] flex flex-col items-center justify-center  hover:bg-white/30 transition"
 //           placeholder="Enter annotation text..."
 //           value={text}
 //           onChange={(e) => setText(e.target.value)}
 //           style={{ marginTop: 20, padding: 5 }}
 //         />
-
 
 //         {/* Buttons */}
 //         <div style={{ marginTop: 10 }}>
@@ -766,9 +774,9 @@ export default function ImageAnnotator() {
 //             onClick={handleSave}
 //             disabled={loading}
 //             style={{ marginLeft: 0 }}
-//             className="bg-blue-900 text-white px-9 rounded-sm py-1"
+//             className="bg-gradient-to-r cursor-pointer from-blue-500 via-indigo-500 to-purple-500 text-white py-2 rounded-xl shadow-md hover:scale-[1.02] transition w-[400px]"
 //           >
-//             {loading ? "Processing...." : "Save"}
+//             {loading ? "Processing...." : "Generate"}
 //           </button>
 //         </div>
 //       </div>

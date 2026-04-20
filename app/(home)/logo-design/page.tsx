@@ -59,7 +59,7 @@ export default function LogoDesign() {
           {/* Upload */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
-            <label className="cursor-pointer outline outline-dashed border-black/60 rounded-xl h-75 flex flex-col items-center justify-center bg-white/60 hover:bg-white transition">
+            <label className="cursor-pointer outline outline-dashed border-black/60 rounded-xl h-90  flex flex-col items-center justify-center bg-white/60 hover:bg-white transition">
 
               <input
                 type="file"
@@ -82,7 +82,7 @@ export default function LogoDesign() {
 
               {optionalPreview && (
                 <Image
-                  className="object-contain w-full h-full rounded-xl"
+                  className="object-center w-full h-full rounded-xl"
                   src={optionalPreview}
                   height={100}
                   width={100}
@@ -90,18 +90,19 @@ export default function LogoDesign() {
                 />
               )}
             </label>
-            <div className="border h-[300px] border-black/60 border-dashed rounded-xl">
+            <div className="border h-[360px] border-dashed rounded-xl  flex items-center justify-center">
+              {loading && <p>Generating...</p>}
 
-              {resultImage && (
-                <div className="">
+              {!loading && resultImage && (
+                <img
+                  src={resultImage}
+                  alt="Generated"
+                  className="w-full h-full object-center rounded-xl"
+                />
+              )}
 
-
-                  <img
-                    src={resultImage}
-                    alt="result"
-                    className=" w-full h-74.5 rounded-xl object-contain"
-                  />
-                </div>
+              {!loading && !resultImage && (
+                <p className="text-gray-400">No image generated yet</p>
               )}
             </div>
           </div>
