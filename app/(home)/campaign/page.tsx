@@ -4,6 +4,7 @@ import React, { useState } from "react";
 export default function Campain() {
   const [text, setText] = useState("");
   const [countValue, setCountValue] = useState("");
+  const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   const [resultImage, setResultImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [optionalPreview, setOptionalPreview] = useState<string | null>(null);
@@ -37,34 +38,29 @@ export default function Campain() {
         throw new Error(errText);
       }
 
+      //  IMPORTANT: store blob URL
       const blob = await res.blob();
-
-      const disposition = res.headers.get("Content-Disposition");
-
-      let filename = "campaign.zip";
-
-      if (disposition && disposition.includes("filename=")) {
-        filename = disposition.split("filename=")[1].replace(/"/g, "");
-      }
-
-
       const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = filename;
 
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-
-      URL.revokeObjectURL(url);
+      setDownloadUrl(url);
 
     } catch (error) {
       console.error(error);
-      // alert("Error: " + error.message);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDownload = () => {
+    if (!downloadUrl) return;
+
+    const a = document.createElement("a");
+    a.href = downloadUrl;
+    a.download = "campaign.zip";
+
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
   };
 
   return (
@@ -157,6 +153,15 @@ export default function Campain() {
           >
             {loading ? "Processing...." : "Generate"}
           </button>
+
+          {downloadUrl && (
+            <button
+              onClick={handleDownload}
+              className="bg-purple-500 text-white py-2 rounded-xl mt-3"
+            >
+              Download Images
+            </button>
+          )}
 
         </div>
       </div>
