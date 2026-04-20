@@ -177,11 +177,11 @@ export default function ImageAnnotator() {
         type: "image/png",
       });
 
-      formData.append("base_image", file);
+      formData.append("mask_image", file);
 
       // optional image (SAFE)
       if (optionalImage instanceof File) {
-        formData.append("mask_image", optionalImage);
+        formData.append("base_image", optionalImage);
       }
 
       formData.append("prompt", text || "");
@@ -315,18 +315,19 @@ export default function ImageAnnotator() {
 
           <div className="lg:mt-10">
             <h2 className="pb-2">Generated Image</h2>
-            <div className="border h-[300px] border-black/60 border-dashed rounded-xl">
+            <div className="border h-[300px] border-dashed border-black/60 rounded-xl  flex items-center justify-center">
+              {loading && <p>Generating...</p>}
 
-              {resultImage && (
-                <div className="">
+              {!loading && resultImage && (
+                <img
+                  src={resultImage}
+                  alt="Generated"
+                  className="w-full h-full object-center rounded-xl"
+                />
+              )}
 
-
-                  <img
-                    src={resultImage}
-                    alt="result"
-                    className=" w-full h-75 rounded-xl"
-                  />
-                </div>
+              {!loading && !resultImage && (
+                <p className="text-gray-400">No image generated yet</p>
               )}
             </div>
           </div>
