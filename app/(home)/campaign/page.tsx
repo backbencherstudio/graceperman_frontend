@@ -48,16 +48,16 @@ export default function Campain() {
       }
 
 
-      // const url = URL.createObjectURL(blob);
-      // const a = document.createElement("a");
-      // a.href = url;
-      // a.download = filename;
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
 
-      // document.body.appendChild(a);
-      // a.click();
-      // a.remove();
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
 
-      // URL.revokeObjectURL(url);
+      URL.revokeObjectURL(url);
 
     } catch (error) {
       console.error(error);
