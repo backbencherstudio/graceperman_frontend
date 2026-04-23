@@ -162,14 +162,64 @@ export default function ImageAnnotator() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  const handleSave = () => {
+  // const handleSave = () => {
+  //   const canvas = canvasRef.current;
+  //   if (!canvas) return;
+
+  //   setLoading(true);
+
+  //   canvas.toBlob(async (blob) => {
+  //     if (!blob) return;
+
+  //     const formData = new FormData();
+
+  //     const file = new File([blob], "annotated.png", {
+  //       type: "image/png",
+  //     });
+
+  //     formData.append("base_image", file);
+
+  //     // optional image (SAFE)
+  //     if (optionalImage instanceof File) {
+  //       formData.append("mask_image", optionalImage);
+  //     }
+
+  //     formData.append("prompt", text || "");
+
+  //     try {
+  //       const res = await fetch(
+  //         `${process.env.NEXT_PUBLIC_API_URL}/edit/area`,
+  //         {
+  //           method: "POST",
+  //           body: formData,
+  //         }
+  //       );
+
+  //       const data = await res.json();
+  //       setResultImage(data.image_url);
+
+  //       console.log("SUCCESS:", data);
+  //     } catch (err) {
+  //       console.log("ERROR:", err);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   }, "image/png");
+  // };
+
+  const handleSave = async () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     setLoading(true);
 
-    canvas.toBlob(async (blob) => {
-      if (!blob) return;
+    try {
+      // convert canvas to blob using Promise
+      const blob: Blob | null = await new Promise((resolve) =>
+        canvas.toBlob((b) => resolve(b), "image/png")
+      );
+
+      if (!blob) throw new Error("Failed to create blob");
 
       const formData = new FormData();
 
@@ -177,35 +227,39 @@ export default function ImageAnnotator() {
         type: "image/png",
       });
 
-      formData.append("mask_image", file);
+      formData.append("base_image", file);
 
       // optional image (SAFE)
       if (optionalImage instanceof File) {
-        formData.append("base_image", optionalImage);
+        formData.append("mask_image", optionalImage);
       }
 
       formData.append("prompt", text || "");
 
-      try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/edit/area`,
-          {
-            method: "POST",
-            body: formData,
-          }
-        );
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/edit/area`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
-        const data = await res.json();
-        setResultImage(data.image_url);
-
-        console.log("SUCCESS:", data);
-      } catch (err) {
-        console.log("ERROR:", err);
-      } finally {
-        setLoading(false);
+      if (!res.ok) {
+        throw new Error(`API Error: ${res.status}`);
       }
-    }, "image/png");
+
+      const data = await res.json();
+
+      setResultImage(data.image_url);
+
+      console.log("SUCCESS:", data);
+    } catch (err) {
+      console.error("ERROR:", err);
+    } finally {
+      setLoading(false);
+    }
   };
+
   const clearCanvas = () => {
     if (imageUrl) drawImage(imageUrl);
   };
