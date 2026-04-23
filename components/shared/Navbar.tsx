@@ -8,7 +8,7 @@ export default function NavItem() {
   const menus = [
     { name: "Logo Generate", path: "/logo-design" },
     { name: "Image Generate", path: "/image-generate" },
-    { name: "Campain", path: "/campaign" },
+    { name: "Campaign", path: "/campaign" },
 
   ];
 
